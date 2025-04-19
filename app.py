@@ -15,14 +15,14 @@ db = SQLAlchemy(app)
 # Initialize Swagger
 swagger = Swagger(app)
 
-# Модель данных для врачебных услуг
+# Модель данных для врачебных услуг   напиши сама создпдим 
 class MedicalService(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     service_name = db.Column(db.String(100), nullable=False)
     doctor_specialty = db.Column(db.String(50), nullable=False)
-    duration_minutes = db.Column(db.Integer, nullable=False)
+    # duration_minutes = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    popularity_rating = db.Column(db.Float, nullable=False)
+    # popularity_rating = db.Column(db.Float, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
 
     def to_dict(self):
@@ -30,9 +30,9 @@ class MedicalService(db.Model):
             'id': self.id,
             'service_name': self.service_name,
             'doctor_specialty': self.doctor_specialty,
-            'duration_minutes': self.duration_minutes,
+            # 'duration_minutes': self.duration_minutes,
             'price': self.price,
-            'popularity_rating': self.popularity_rating,
+            # 'popularity_rating': self.popularity_rating,
             'is_available': self.is_available
         }
 
@@ -50,7 +50,7 @@ with app.app_context():
             'name': 'sort_by',
             'in': 'query',
             'type': 'string',
-            'description': 'Field to sort by (id, service_name, doctor_specialty, duration_minutes, price, popularity_rating)',
+            'description': 'Field to sort by (id, service_name, doctor_specialty, price)',
             'required': False
         },
         {
@@ -72,9 +72,7 @@ with app.app_context():
                         'id': {'type': 'integer'},
                         'service_name': {'type': 'string'},
                         'doctor_specialty': {'type': 'string'},
-                        'duration_minutes': {'type': 'integer'},
                         'price': {'type': 'number'},
-                        'popularity_rating': {'type': 'number'},
                         'is_available': {'type': 'boolean'}
                     }
                 }
@@ -108,7 +106,7 @@ def get_services():
             'name': 'field',
             'in': 'query',
             'type': 'string',
-            'description': 'Numerical field (duration_minutes, price, popularity_rating)',
+            'description': 'Numerical field ( price )',
             'required': True
         }
     ],
@@ -131,7 +129,7 @@ def get_stats():
     field = request.args.get('field')
     
     # Проверка допустимости поля
-    if field not in ['duration_minutes', 'price', 'popularity_rating']:
+    if field not in [ 'price', ]:
         return jsonify({'error': f'Invalid field for statistics: {field}. Must be a numerical field.'}), 400
     
     field_column = getattr(MedicalService, field)
@@ -164,12 +162,10 @@ def get_stats():
                 'properties': {
                     'service_name': {'type': 'string'},
                     'doctor_specialty': {'type': 'string'},
-                    'duration_minutes': {'type': 'integer'},
                     'price': {'type': 'number'},
-                    'popularity_rating': {'type': 'number'},
                     'is_available': {'type': 'boolean'}
                 },
-                'required': ['service_name', 'doctor_specialty', 'duration_minutes', 'price', 'popularity_rating']
+                'required': ['service_name', 'doctor_specialty', 'price',]
             }
         }
     ],
@@ -186,9 +182,7 @@ def get_stats():
                             'id': {'type': 'integer'},
                             'service_name': {'type': 'string'},
                             'doctor_specialty': {'type': 'string'},
-                            'duration_minutes': {'type': 'integer'},
                             'price': {'type': 'number'},
-                            'popularity_rating': {'type': 'number'},
                             'is_available': {'type': 'boolean'}
                         }
                     }
@@ -199,8 +193,8 @@ def get_stats():
 })
 def add_service():
     data = request.json
-    required_fields = ['service_name', 'doctor_specialty', 'duration_minutes', 'price', 'popularity_rating']
-    
+    required_fields = ['service_name', 'doctor_specialty', 'price',]
+
     # Проверка наличия всех необходимых полей
     for field in required_fields:
         if field not in data:
@@ -210,9 +204,7 @@ def add_service():
     new_service = MedicalService(
         service_name=data['service_name'],
         doctor_specialty=data['doctor_specialty'],
-        duration_minutes=data['duration_minutes'],
         price=data['price'],
-        popularity_rating=data['popularity_rating'],
         is_available=data.get('is_available', True)
     )
     
@@ -246,9 +238,7 @@ def add_service():
                     'id': {'type': 'integer'},
                     'service_name': {'type': 'string'},
                     'doctor_specialty': {'type': 'string'},
-                    'duration_minutes': {'type': 'integer'},
                     'price': {'type': 'number'},
-                    'popularity_rating': {'type': 'number'},
                     'is_available': {'type': 'boolean'}
                 }
             }
@@ -282,9 +272,7 @@ def get_service(service_id):
                 'properties': {
                     'service_name': {'type': 'string'},
                     'doctor_specialty': {'type': 'string'},
-                    'duration_minutes': {'type': 'integer'},
                     'price': {'type': 'number'},
-                    'popularity_rating': {'type': 'number'},
                     'is_available': {'type': 'boolean'}
                 }
             }
@@ -303,9 +291,7 @@ def get_service(service_id):
                             'id': {'type': 'integer'},
                             'service_name': {'type': 'string'},
                             'doctor_specialty': {'type': 'string'},
-                            'duration_minutes': {'type': 'integer'},
                             'price': {'type': 'number'},
-                            'popularity_rating': {'type': 'number'},
                             'is_available': {'type': 'boolean'}
                         }
                     }
@@ -326,12 +312,8 @@ def update_service(service_id):
         service.service_name = data['service_name']
     if 'doctor_specialty' in data:
         service.doctor_specialty = data['doctor_specialty']
-    if 'duration_minutes' in data:
-        service.duration_minutes = data['duration_minutes']
     if 'price' in data:
         service.price = data['price']
-    if 'popularity_rating' in data:
-        service.popularity_rating = data['popularity_rating']
     if 'is_available' in data:
         service.is_available = data['is_available']
     
@@ -378,98 +360,98 @@ def delete_service(service_id):
     return jsonify({'message': f'Service with ID {service_id} deleted successfully'})
 
 # Добавление тестовых данных для примера
-@app.route('/api/populate', methods=['POST'])
-@swag_from({
-    'tags': ['Utility'],
-    'summary': 'Populate database with sample data',
-    'responses': {
-        200: {
-            'description': 'Database populated successfully',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                    'count': {'type': 'integer'}
-                }
-            }
-        }
-    }
-})
-def populate_data():
-    # Пример данных
-    sample_services = [
-        {
-            'service_name': 'Консультация терапевта',
-            'doctor_specialty': 'Терапевт',
-            'duration_minutes': 30,
-            'price': 1500.0,
-            'popularity_rating': 4.8,
-            'is_available': True
-        },
-        {
-            'service_name': 'Консультация кардиолога',
-            'doctor_specialty': 'Кардиолог',
-            'duration_minutes': 45,
-            'price': 2500.0,
-            'popularity_rating': 4.9,
-            'is_available': True
-        },
-        {
-            'service_name': 'УЗИ брюшной полости',
-            'doctor_specialty': 'Диагностика',
-            'duration_minutes': 40,
-            'price': 3000.0,
-            'popularity_rating': 4.7,
-            'is_available': True
-        },
-        {
-            'service_name': 'Анализ крови общий',
-            'doctor_specialty': 'Лаборатория',
-            'duration_minutes': 10,
-            'price': 800.0,
-            'popularity_rating': 4.5,
-            'is_available': True
-        },
-        {
-            'service_name': 'Массаж спины',
-            'doctor_specialty': 'Физиотерапия',
-            'duration_minutes': 60,
-            'price': 2000.0,
-            'popularity_rating': 4.6,
-            'is_available': True
-        },
-        {
-            'service_name': 'МРТ головного мозга',
-            'doctor_specialty': 'Диагностика',
-            'duration_minutes': 30,
-            'price': 8000.0,
-            'popularity_rating': 4.9,
-            'is_available': True
-        },
-        {
-            'service_name': 'Прием невролога',
-            'doctor_specialty': 'Невролог',
-            'duration_minutes': 50,
-            'price': 2800.0,
-            'popularity_rating': 4.7,
-            'is_available': True
-        }
-    ]
+# @app.route('/api/populate', methods=['POST'])
+# @swag_from({
+#     'tags': ['Utility'],
+#     'summary': 'Populate database with sample data',
+#     'responses': {
+#         200: {
+#             'description': 'Database populated successfully',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'message': {'type': 'string'},
+#                     'count': {'type': 'integer'}
+#                 }
+#             }
+#         }
+#     }
+# })
+# def populate_data():
+#     # Пример данных
+#     sample_services = [
+#         {
+#             'service_name': 'Консультация терапевта',
+#             'doctor_specialty': 'Терапевт',
+#             'duration_minutes': 30,
+#             'price': 1500.0,
+#             'popularity_rating': 4.8,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Консультация кардиолога',
+#             'doctor_specialty': 'Кардиолог',
+#             'duration_minutes': 45,
+#             'price': 2500.0,
+#             'popularity_rating': 4.9,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'УЗИ брюшной полости',
+#             'doctor_specialty': 'Диагностика',
+#             'duration_minutes': 40,
+#             'price': 3000.0,
+#             'popularity_rating': 4.7,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Анализ крови общий',
+#             'doctor_specialty': 'Лаборатория',
+#             'duration_minutes': 10,
+#             'price': 800.0,
+#             'popularity_rating': 4.5,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Массаж спины',
+#             'doctor_specialty': 'Физиотерапия',
+#             'duration_minutes': 60,
+#             'price': 2000.0,
+#             'popularity_rating': 4.6,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'МРТ головного мозга',
+#             'doctor_specialty': 'Диагностика',
+#             'duration_minutes': 30,
+#             'price': 8000.0,
+#             'popularity_rating': 4.9,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Прием невролога',
+#             'doctor_specialty': 'Невролог',
+#             'duration_minutes': 50,
+#             'price': 2800.0,
+#             'popularity_rating': 4.7,
+#             'is_available': True
+#         }
+#     ]
     
-    # Очистка существующих данных
-    db.session.query(MedicalService).delete()
+#     # Очистка существующих данных
+#     db.session.query(MedicalService).delete()
     
-    # Добавление новых данных
-    for service_data in sample_services:
-        service = MedicalService(**service_data)
-        db.session.add(service)
+#     # Добавление новых данных
+#     for service_data in sample_services:
+#         service = MedicalService(**service_data)
+#         db.session.add(service)
     
-    db.session.commit()
+#     db.session.commit()
     
-    return jsonify({
-        'message': 'Sample data added successfully',
-        'count': len(sample_services)
-    })
+#     return jsonify({
+#         'message': 'Sample data added successfully',
+#         'count': len(sample_services)
+#     })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
