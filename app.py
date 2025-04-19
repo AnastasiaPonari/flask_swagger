@@ -374,6 +374,9 @@ def delete_service(service_id):
     }
 })
 def populate_data():
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
     # Пример данных
     sample_services = [
         {
