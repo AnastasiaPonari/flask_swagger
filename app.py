@@ -3,19 +3,35 @@ from flask import Flask, request, jsonify
 from flasgger import Swagger, swag_from
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medical_services.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize SQLAlchemy
+
+
+# Установка переменных окружения
+app.config['SWAGGER'] = {
+    'title': 'Medical Services API',
+    'description': 'API для работы с врачебными услугами',
+    'version': '1.0.0'
+}
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///medical_services.db')
+
+
+# инициализация SQLAlchemy
 db = SQLAlchemy(app)
 
-# Initialize Swagger
+# инициализация Swagger
 swagger = Swagger(app)
 
-# Модель данных для врачебных услуг   напиши сама создпдим 
+# Модель данных для врачебных услуг
 class MedicalService(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     service_name = db.Column(db.String(100), nullable=False)
@@ -187,7 +203,7 @@ def add_service():
     # Проверка наличия всех необходимых полей
     for field in required_fields:
         if field not in data:
-            return jsonify({'error': f'Missing required field: {field}'}), 400
+            return jsonify({'error': f'Отсутствует обязательное поле: {field}'}), 400
     
     # Создание новой услуги
     new_service = MedicalService(
@@ -201,15 +217,15 @@ def add_service():
     db.session.commit()
     
     return jsonify({
-        'message': 'Service added successfully',
+        'message': 'Услуга успешно добавлена',
         'service': new_service.to_dict()
     }), 201
 
 # Получение услуги по ID
 @app.route('/api/services/<int:service_id>', methods=['GET'])
 @swag_from({
-    'tags': ['Medical Services'],
-    'summary': 'Get a medical service by ID',
+    'tags': ['Врачебные услуги'],
+    'summary': 'Получите врачебную услугу по ID',
     'parameters': [
         {
             'name': 'service_id',
@@ -220,7 +236,7 @@ def add_service():
     ],
     'responses': {
         200: {
-            'description': 'Medical service details',
+            'description': 'Врачебная услуга подробности',
             'schema': {
                 'type': 'object',
                 'properties': {
@@ -237,15 +253,15 @@ def add_service():
 def get_service(service_id):
     service = MedicalService.query.get(service_id)
     if not service:
-        return jsonify({'error': 'Service not found'}), 404
+        return jsonify({'error': 'Услуга не найдена'}), 404
     
     return jsonify(service.to_dict())
 
 # Обновление услуги по ID
 @app.route('/api/services/<int:service_id>', methods=['PUT'])
 @swag_from({
-    'tags': ['Medical Services'],
-    'summary': 'Update a medical service by ID',
+    'tags': ['Врачебные услуги'],
+    'summary': 'Обновите врачебную услугу по ID',
     'parameters': [
         {
             'name': 'service_id',
@@ -269,7 +285,7 @@ def get_service(service_id):
     ],
     'responses': {
         200: {
-            'description': 'Service updated successfully',
+            'description': 'Услуга успешно обновлена',
             'schema': {
                 'type': 'object',
                 'properties': {
@@ -292,7 +308,7 @@ def get_service(service_id):
 def update_service(service_id):
     service = MedicalService.query.get(service_id)
     if not service:
-        return jsonify({'error': 'Service not found'}), 404
+        return jsonify({'error': 'Услуга не найдена'}), 404
     
     data = request.json
     
@@ -309,15 +325,15 @@ def update_service(service_id):
     db.session.commit()
     
     return jsonify({
-        'message': 'Service updated successfully',
+        'message': 'Услуга успешно обновлена',
         'service': service.to_dict()
     })
 
 # Удаление услуги по ID
 @app.route('/api/services/<int:service_id>', methods=['DELETE'])
 @swag_from({
-    'tags': ['Medical Services'],
-    'summary': 'Delete a medical service by ID',
+    'tags': ['Врачебные услуги'],
+    'summary': 'Удалите врачебную услугу по ID',
     'parameters': [
         {
             'name': 'service_id',
@@ -328,7 +344,7 @@ def update_service(service_id):
     ],
     'responses': {
         200: {
-            'description': 'Service deleted successfully',
+            'description': 'Услуга успешно удалена',
             'schema': {
                 'type': 'object',
                 'properties': {
@@ -341,18 +357,18 @@ def update_service(service_id):
 def delete_service(service_id):
     service = MedicalService.query.get(service_id)
     if not service:
-        return jsonify({'error': 'Service not found'}), 404
+        return jsonify({'error': 'Услуга не найдена'}), 404
     
     db.session.delete(service)
     db.session.commit()
     
-    return jsonify({'message': f'Service with ID {service_id} deleted successfully'})
+    return jsonify({'message': f'Услуга {service_id} успешно удалена'})
 
 # Добавление тестовых данных для примера
 @app.route('/api/populate', methods=['POST'])
 @swag_from({
     'tags': ['Utility'],
-    'summary': 'Populate database with sample data',
+    'summary': 'Добавьте тестовые данные для примера',
     'responses': {
         200: {
             'description': 'Database populated successfully',
