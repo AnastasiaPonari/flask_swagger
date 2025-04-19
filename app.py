@@ -87,7 +87,7 @@ def get_services():
     # Применение сортировки
     sort_field = getattr(MedicalService, sort_by)
     # if order.lower() == 'desc':
-    sort_field = sort_field.desc()
+    sort_field = sort_field.asc()
     
     services = MedicalService.query.order_by(sort_field).all()
     return jsonify([service.to_dict() for service in services])
