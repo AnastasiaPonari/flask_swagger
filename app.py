@@ -20,9 +20,7 @@ class MedicalService(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     service_name = db.Column(db.String(100), nullable=False)
     doctor_specialty = db.Column(db.String(50), nullable=False)
-    # duration_minutes = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    # popularity_rating = db.Column(db.Float, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
 
     def to_dict(self):
@@ -30,9 +28,7 @@ class MedicalService(db.Model):
             'id': self.id,
             'service_name': self.service_name,
             'doctor_specialty': self.doctor_specialty,
-            # 'duration_minutes': self.duration_minutes,
             'price': self.price,
-            # 'popularity_rating': self.popularity_rating,
             'is_available': self.is_available
         }
 
@@ -53,13 +49,13 @@ with app.app_context():
             'description': 'Field to sort by (id, service_name, doctor_specialty, price)',
             'required': False
         },
-        {
-            'name': 'order',
-            'in': 'query',
-            'type': 'string',
-            'description': 'Sort order (asc, desc)',
-            'required': False
-        }
+        # {
+        #     'name': 'order',
+        #     'in': 'query',
+        #     'type': 'string',
+        #     'description': 'Sort order (asc, desc)',
+        #     'required': False
+        # }
     ],
     'responses': {
         200: {
@@ -82,7 +78,7 @@ with app.app_context():
 })
 def get_services():
     sort_by = request.args.get('sort_by', 'id')
-    order = request.args.get('order', 'asc')
+    # order = request.args.get('order', 'asc')
     
     # Проверка допустимости поля для сортировки
     if not hasattr(MedicalService, sort_by):
@@ -90,8 +86,8 @@ def get_services():
     
     # Применение сортировки
     sort_field = getattr(MedicalService, sort_by)
-    if order.lower() == 'desc':
-        sort_field = sort_field.desc()
+    # if order.lower() == 'desc':
+    sort_field = sort_field.desc()
     
     services = MedicalService.query.order_by(sort_field).all()
     return jsonify([service.to_dict() for service in services])
@@ -360,98 +356,84 @@ def delete_service(service_id):
     return jsonify({'message': f'Service with ID {service_id} deleted successfully'})
 
 # Добавление тестовых данных для примера
-# @app.route('/api/populate', methods=['POST'])
-# @swag_from({
-#     'tags': ['Utility'],
-#     'summary': 'Populate database with sample data',
-#     'responses': {
-#         200: {
-#             'description': 'Database populated successfully',
-#             'schema': {
-#                 'type': 'object',
-#                 'properties': {
-#                     'message': {'type': 'string'},
-#                     'count': {'type': 'integer'}
-#                 }
-#             }
-#         }
-#     }
-# })
-# def populate_data():
-#     # Пример данных
-#     sample_services = [
-#         {
-#             'service_name': 'Консультация терапевта',
-#             'doctor_specialty': 'Терапевт',
-#             'duration_minutes': 30,
-#             'price': 1500.0,
-#             'popularity_rating': 4.8,
-#             'is_available': True
-#         },
-#         {
-#             'service_name': 'Консультация кардиолога',
-#             'doctor_specialty': 'Кардиолог',
-#             'duration_minutes': 45,
-#             'price': 2500.0,
-#             'popularity_rating': 4.9,
-#             'is_available': True
-#         },
-#         {
-#             'service_name': 'УЗИ брюшной полости',
-#             'doctor_specialty': 'Диагностика',
-#             'duration_minutes': 40,
-#             'price': 3000.0,
-#             'popularity_rating': 4.7,
-#             'is_available': True
-#         },
-#         {
-#             'service_name': 'Анализ крови общий',
-#             'doctor_specialty': 'Лаборатория',
-#             'duration_minutes': 10,
-#             'price': 800.0,
-#             'popularity_rating': 4.5,
-#             'is_available': True
-#         },
-#         {
-#             'service_name': 'Массаж спины',
-#             'doctor_specialty': 'Физиотерапия',
-#             'duration_minutes': 60,
-#             'price': 2000.0,
-#             'popularity_rating': 4.6,
-#             'is_available': True
-#         },
-#         {
-#             'service_name': 'МРТ головного мозга',
-#             'doctor_specialty': 'Диагностика',
-#             'duration_minutes': 30,
-#             'price': 8000.0,
-#             'popularity_rating': 4.9,
-#             'is_available': True
-#         },
-#         {
-#             'service_name': 'Прием невролога',
-#             'doctor_specialty': 'Невролог',
-#             'duration_minutes': 50,
-#             'price': 2800.0,
-#             'popularity_rating': 4.7,
-#             'is_available': True
-#         }
-#     ]
+@app.route('/api/populate', methods=['POST'])
+@swag_from({
+    'tags': ['Utility'],
+    'summary': 'Populate database with sample data',
+    'responses': {
+        200: {
+            'description': 'Database populated successfully',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'message': {'type': 'string'},
+                    'count': {'type': 'integer'}
+                }
+            }
+        }
+    }
+})
+def populate_data():
+    # Пример данных
+    sample_services = [
+        {
+            'service_name': 'Консультация терапевта',
+            'doctor_specialty': 'Терапевт',
+            'price': 1500.0,
+            'is_available': True
+        },
+        {
+            'service_name': 'Консультация кардиолога',
+            'doctor_specialty': 'Кардиолог',
+            'price': 2500.0,
+            'is_available': True
+        },
+        {
+            'service_name': 'УЗИ брюшной полости',
+            'doctor_specialty': 'Диагностика',
+            'price': 3000.0,
+            'is_available': True
+        },
+        {
+            'service_name': 'Анализ крови общий',
+            'doctor_specialty': 'Лаборатория',
+            'price': 800.0,
+            'is_available': True
+        },
+        {
+            'service_name': 'Массаж спины',
+            'doctor_specialty': 'Физиотерапия',
+            'price': 2000.0,
+            'is_available': True
+        },
+        {
+            'service_name': 'МРТ головного мозга',
+            'doctor_specialty': 'Диагностика',
+            'price': 8000.0,
+            'is_available': True
+        },
+        {
+            'service_name': 'Прием невролога',
+            'doctor_specialty': 'Невролог',
+            'price': 2800.0,
+            'is_available': True
+        }
+    ]
     
-#     # Очистка существующих данных
-#     db.session.query(MedicalService).delete()
+    # Очистка существующих данных
+    db.session.query(MedicalService).delete()
     
-#     # Добавление новых данных
-#     for service_data in sample_services:
-#         service = MedicalService(**service_data)
-#         db.session.add(service)
+    # Добавление новых данных
+    for service_data in sample_services:
+        service = MedicalService(**service_data)
+        db.session.add(service)
     
-#     db.session.commit()
+    db.session.commit()
     
-#     return jsonify({
-#         'message': 'Sample data added successfully',
-#         'count': len(sample_services)
-#     })
+    return jsonify({
+        'message': 'Sample data added successfully',
+        'count': len(sample_services)
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
