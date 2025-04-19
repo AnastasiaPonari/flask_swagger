@@ -39,27 +39,20 @@ with app.app_context():
 # Получение всех услуг с возможностью сортировки
 @app.route('/api/services', methods=['GET'])
 @swag_from({
-    'tags': ['Medical Services'],
-    'summary': 'Get all medical services with optional sorting',
+    'tags': ['Врачебные услуги'],
+    'summary': 'Получите все медицинские услуги с возможностью сортировки',
     'parameters': [
         {
             'name': 'sort_by',
             'in': 'query',
             'type': 'string',
-            'description': 'Field to sort by (id, service_name, doctor_specialty, price)',
+            'description': 'Поле для сортировки (id, service_name, doctor_specialty, price)',
             'required': False
         },
-        # {
-        #     'name': 'order',
-        #     'in': 'query',
-        #     'type': 'string',
-        #     'description': 'Sort order (asc, desc)',
-        #     'required': False
-        # }
     ],
     'responses': {
         200: {
-            'description': 'List of medical services',
+            'description': 'Список врачебных услуг',
             'schema': {
                 'type': 'array',
                 'items': {
@@ -82,7 +75,7 @@ def get_services():
     
     # Проверка допустимости поля для сортировки
     if not hasattr(MedicalService, sort_by):
-        return jsonify({'error': f'Invalid sort field: {sort_by}'}), 400
+        return jsonify({'error': f'Неизвестное поле для сортировки: {sort_by}'}), 400
     
     # Применение сортировки
     sort_field = getattr(MedicalService, sort_by)
@@ -95,20 +88,20 @@ def get_services():
 # Получение статистики по числовым полям
 @app.route('/api/services/stats', methods=['GET'])
 @swag_from({
-    'tags': ['Medical Services'],
-    'summary': 'Get statistics for numerical fields',
+    'tags': ['Врачебные услуги'],
+    'summary': 'Получите статистику по числовым полям',
     'parameters': [
         {
             'name': 'field',
             'in': 'query',
             'type': 'string',
-            'description': 'Numerical field ( price )',
+            'description': 'Числовое поле ( price )',
             'required': True
         }
     ],
     'responses': {
         200: {
-            'description': 'Statistics for the specified field',
+            'description': 'Статистика по числовым полям',
             'schema': {
                 'type': 'object',
                 'properties': {
@@ -126,7 +119,7 @@ def get_stats():
     
     # Проверка допустимости поля
     if field not in [ 'price', ]:
-        return jsonify({'error': f'Invalid field for statistics: {field}. Must be a numerical field.'}), 400
+        return jsonify({'error': f'Неизвестное поле: {field}. Должно быть числовое.'}), 400
     
     field_column = getattr(MedicalService, field)
     
@@ -147,8 +140,8 @@ def get_stats():
 # Добавление новой услуги
 @app.route('/api/services', methods=['POST'])
 @swag_from({
-    'tags': ['Medical Services'],
-    'summary': 'Add a new medical service',
+    'tags': ['Врачебные услуги'],
+    'summary': 'Добавьте новую врачебную услугу',
     'parameters': [
         {
             'name': 'body',
@@ -167,7 +160,7 @@ def get_stats():
     ],
     'responses': {
         201: {
-            'description': 'Service created successfully',
+            'description': 'Услуга успешно добавлена',
             'schema': {
                 'type': 'object',
                 'properties': {
