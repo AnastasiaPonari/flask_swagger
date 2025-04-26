@@ -1,6 +1,7 @@
 # app.py
 from flask import Flask, request, jsonify
 from flasgger import Swagger, swag_from
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from dotenv import load_dotenv
@@ -9,17 +10,8 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medical_services.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medical_services.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-
-
-# Установка переменных окружения
-app.config['SWAGGER'] = {
-    'title': 'Medical Services API',
-    'description': 'API для работы с врачебными услугами',
-    'version': '1.0.0'
-}
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///medical_services.db')
@@ -27,6 +19,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:/
 
 # инициализация SQLAlchemy
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
+# for db migrations
+# flask db init    # First time only
+# flask db migrate -m "Description of changes"
+# flask db upgrade
 
 # инициализация Swagger
 swagger = Swagger(app)
@@ -365,87 +363,87 @@ def delete_service(service_id):
     return jsonify({'message': f'Услуга {service_id} успешно удалена'})
 
 # Добавление тестовых данных для примера
-@app.route('/api/populate', methods=['POST'])
-@swag_from({
-    'tags': ['Utility'],
-    'summary': 'Добавьте тестовые данные для примера',
-    'responses': {
-        200: {
-            'description': 'Database populated successfully',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                    'count': {'type': 'integer'}
-                }
-            }
-        }
-    }
-})
-def populate_data():
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
-    # Пример данных
-    sample_services = [
-        {
-            'service_name': 'Консультация терапевта',
-            'doctor_specialty': 'Терапевт',
-            'price': 1500.0,
-            'is_available': True
-        },
-        {
-            'service_name': 'Консультация кардиолога',
-            'doctor_specialty': 'Кардиолог',
-            'price': 2500.0,
-            'is_available': True
-        },
-        {
-            'service_name': 'УЗИ брюшной полости',
-            'doctor_specialty': 'Диагностика',
-            'price': 3000.0,
-            'is_available': True
-        },
-        {
-            'service_name': 'Анализ крови общий',
-            'doctor_specialty': 'Лаборатория',
-            'price': 800.0,
-            'is_available': True
-        },
-        {
-            'service_name': 'Массаж спины',
-            'doctor_specialty': 'Физиотерапия',
-            'price': 2000.0,
-            'is_available': True
-        },
-        {
-            'service_name': 'МРТ головного мозга',
-            'doctor_specialty': 'Диагностика',
-            'price': 8000.0,
-            'is_available': True
-        },
-        {
-            'service_name': 'Прием невролога',
-            'doctor_specialty': 'Невролог',
-            'price': 2800.0,
-            'is_available': True
-        }
-    ]
+# @app.route('/api/populate', methods=['POST'])
+# @swag_from({
+#     'tags': ['Utility'],
+#     'summary': 'Добавьте тестовые данные для примера',
+#     'responses': {
+#         200: {
+#             'description': 'Database populated successfully',
+#             'schema': {
+#                 'type': 'object',
+#                 'properties': {
+#                     'message': {'type': 'string'},
+#                     'count': {'type': 'integer'}
+#                 }
+#             }
+#         }
+#     }
+# })
+# def populate_data():
+#     with app.app_context():
+#         db.drop_all()
+#         db.create_all()
+#     # Пример данных
+#     sample_services = [
+#         {
+#             'service_name': 'Консультация терапевта',
+#             'doctor_specialty': 'Терапевт',
+#             'price': 1500.0,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Консультация кардиолога',
+#             'doctor_specialty': 'Кардиолог',
+#             'price': 2500.0,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'УЗИ брюшной полости',
+#             'doctor_specialty': 'Диагностика',
+#             'price': 3000.0,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Анализ крови общий',
+#             'doctor_specialty': 'Лаборатория',
+#             'price': 800.0,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Массаж спины',
+#             'doctor_specialty': 'Физиотерапия',
+#             'price': 2000.0,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'МРТ головного мозга',
+#             'doctor_specialty': 'Диагностика',
+#             'price': 8000.0,
+#             'is_available': True
+#         },
+#         {
+#             'service_name': 'Прием невролога',
+#             'doctor_specialty': 'Невролог',
+#             'price': 2800.0,
+#             'is_available': True
+#         }
+#     ]
     
-    # Очистка существующих данных
-    db.session.query(MedicalService).delete()
+#     # Очистка существующих данных
+#     db.session.query(MedicalService).delete()
     
-    # Добавление новых данных
-    for service_data in sample_services:
-        service = MedicalService(**service_data)
-        db.session.add(service)
+#     # Добавление новых данных
+#     for service_data in sample_services:
+#         service = MedicalService(**service_data)
+#         db.session.add(service)
     
-    db.session.commit()
+#     db.session.commit()
     
-    return jsonify({
-        'message': 'Sample data added successfully',
-        'count': len(sample_services)
-    })
+#     return jsonify({
+#         'message': 'Sample data added successfully',
+#         'count': len(sample_services)
+#     })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
