@@ -300,15 +300,6 @@ def get_service(service_id):
                     }
                 }
             }
-        },
-        400: {
-            'description': 'Неверный формат запроса',
-            'schema': {
-                'type': 'object',
-                'properties': {
-                    'error': {'type': 'string'}
-                }
-            }
         }
     }
 })
