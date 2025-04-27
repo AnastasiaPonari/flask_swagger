@@ -202,6 +202,21 @@ def add_service():
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'Отсутствует обязательное поле: {field}'}), 400
+        
+            # Валидация данных
+    if not isinstance(data['service_name'], str) or not data['service_name'].strip():
+        return jsonify({'error': 'Название услуги должно быть непустой строкой'}), 400
+            
+    if not isinstance(data['doctor_specialty'], str) or not data['doctor_specialty'].strip():
+        return jsonify({'error': 'Специальность врача должна быть непустой строкой'}), 400
+            
+        # Проверка, что цена - это число и оно положительное
+    if not isinstance(data['price'], (int, float)) or data['price'] < 0:
+        return jsonify({'error': 'Цена должна быть положительным числом'}), 400
+            
+    if 'is_available' in data and not isinstance(data['is_available'], bool):
+        return jsonify({'error': 'Поле доступности должно быть логическим значением'}), 400
+        
     
     # Создание новой услуги
     new_service = MedicalService(
