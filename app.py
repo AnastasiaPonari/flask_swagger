@@ -195,44 +195,49 @@ def get_stats():
     }
 })
 def add_service():
-    data = request.json
-    required_fields = ['service_name', 'doctor_specialty', 'price',]
+    try:
+        data = request.json
+        required_fields = ['service_name', 'doctor_specialty', 'price',]
 
-    # Проверка наличия всех необходимых полей
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'Отсутствует обязательное поле: {field}'}), 400
-        
-            # Валидация данных
-    if not isinstance(data['service_name'], str) or not data['service_name'].strip():
-        return jsonify({'error': 'Название услуги должно быть непустой строкой'}), 400
-            
-    if not isinstance(data['doctor_specialty'], str) or not data['doctor_specialty'].strip():
-        return jsonify({'error': 'Специальность врача должна быть непустой строкой'}), 400
-            
-        # Проверка, что цена - это число и оно положительное
-    if not isinstance(data['price'], (int, float)) or data['price'] < 0:
-        return jsonify({'error': 'Цена должна быть положительным числом'}), 400
-            
-    if 'is_available' in data and not isinstance(data['is_available'], bool):
-        return jsonify({'error': 'Поле доступности должно быть логическим значением'}), 400
-        
-    
-    # Создание новой услуги
-    new_service = MedicalService(
-        service_name=data['service_name'],
-        doctor_specialty=data['doctor_specialty'],
-        price=data['price'],
-        is_available=data.get('is_available', True)
-    )
-    
-    db.session.add(new_service)
-    db.session.commit()
-    
-    return jsonify({
-        'message': 'Услуга успешно добавлена',
-        'service': new_service.to_dict()
-    }), 201
+        # Проверка наличия всех необходимых полей
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Отсутствует обязательное поле: {field}'}), 400
+
+                # Валидация данных
+        if not isinstance(data['service_name'], str) or not data['service_name'].strip():
+            return jsonify({'error': 'Название услуги должно быть непустой строкой'}), 400
+
+        if not isinstance(data['doctor_specialty'], str) or not data['doctor_specialty'].strip():
+            return jsonify({'error': 'Специальность врача должна быть непустой строкой'}), 400
+
+            # Проверка, что цена - это число и оно положительное
+        if not isinstance(data['price'], (int, float)) or data['price'] < 0:
+            return jsonify({'error': 'Цена должна быть положительным числом'}), 400
+
+        if 'is_available' in data and not isinstance(data['is_available'], bool):
+            return jsonify({'error': 'Поле доступности должно быть логическим значением'}), 400
+
+
+        # Создание новой услуги
+        new_service = MedicalService(
+            service_name=data['service_name'],
+            doctor_specialty=data['doctor_specialty'],
+            price=data['price'],
+            is_available=data.get('is_available', True)
+        )
+
+        db.session.add(new_service)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Услуга успешно добавлена',
+            'service': new_service.to_dict()
+        }), 201
+
+    except Exception as e:
+        app.logger.error(f"Error adding service: {str(e)}")
+        return jsonify({'error': 'An internal error occurred'}), 500
 
 # Получение услуги по ID
 @app.route('/api/services/<int:service_id>', methods=['GET'])
