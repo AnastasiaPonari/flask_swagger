@@ -356,8 +356,8 @@ def update_service(service_id):
 @app.route('/api/services/<int:service_id>', methods=['PATCH'])
 @swag_from({
     'tags': ['Врачебные услуги'],
-    'summary': 'Частично обновите врачебную услугу по ID',
-    'description': 'Обновляет только указанные поля услуги, оставляя остальные без изменений',
+    'summary': 'Обновите врачебную услугу по id',
+    'description': 'Обновляет только указанные поля услуги, остальные остаются без изменений',
     'parameters': [
         {
             'name': 'service_id',
