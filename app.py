@@ -10,9 +10,7 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medical_services.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///medical_services.db')
 
@@ -85,7 +83,6 @@ with app.app_context():
 })
 def get_services():
     sort_by = request.args.get('sort_by', 'id')
-    # order = request.args.get('order', 'asc')
     
     # Проверка допустимости поля для сортировки
     if not hasattr(MedicalService, sort_by):
@@ -93,7 +90,6 @@ def get_services():
     
     # Применение сортировки
     sort_field = getattr(MedicalService, sort_by)
-    # if order.lower() == 'desc':
     sort_field = sort_field.asc()
     
     services = MedicalService.query.order_by(sort_field).all()
@@ -349,6 +345,113 @@ def update_service(service_id):
     if 'is_available' in data:
         service.is_available = data['is_available']
     
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Услуга успешно обновлена',
+        'service': service.to_dict()
+    })
+
+# Partial update of a service by ID
+@app.route('/api/services/<int:service_id>', methods=['PATCH'])
+@swag_from({
+    'tags': ['Врачебные услуги'],
+    'summary': 'Частично обновите врачебную услугу по ID',
+    'description': 'Обновляет только указанные поля услуги, оставляя остальные без изменений',
+    'parameters': [
+        {
+            'name': 'service_id',
+            'in': 'path',
+            'type': 'integer',
+            'required': True,
+            'description': 'ID услуги для обновления'
+        },
+        {
+            'name': 'body',
+            'in': 'body',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'service_name': {'type': 'string'},
+                    'doctor_specialty': {'type': 'string'},
+                    'price': {'type': 'number'},
+                    'is_available': {'type': 'boolean'}
+                }
+            },
+            'description': 'Поля для обновления (укажите только те, которые нужно изменить)'
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Услуга успешно обновлена',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'message': {'type': 'string'},
+                    'service': {
+                        'type': 'object',
+                        'properties': {
+                            'id': {'type': 'integer'},
+                            'service_name': {'type': 'string'},
+                            'doctor_specialty': {'type': 'string'},
+                            'price': {'type': 'number'},
+                            'is_available': {'type': 'boolean'}
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            'description': 'Неверный формат данных',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        },
+        404: {
+            'description': 'Услуга не найдена',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'}
+                }
+            }
+        }
+    }
+})
+def patch_service(service_id):
+    service = MedicalService.query.get(service_id)
+    if not service:
+        return jsonify({'error': 'Услуга не найдена'}), 404
+    
+    data = request.json
+    if not data:
+        return jsonify({'error': 'Отсутствуют данные для обновления'}), 400
+    
+    # Валидация данных, если они предоставлены
+    if 'service_name' in data:
+        if not isinstance(data['service_name'], str) or not data['service_name'].strip():
+            return jsonify({'error': 'Название услуги должно быть непустой строкой'}), 400
+        service.service_name = data['service_name']
+        
+    if 'doctor_specialty' in data:
+        if not isinstance(data['doctor_specialty'], str) or not data['doctor_specialty'].strip():
+            return jsonify({'error': 'Специальность врача должна быть непустой строкой'}), 400
+        service.doctor_specialty = data['doctor_specialty']
+        
+    if 'price' in data:
+        if not isinstance(data['price'], (int, float)) or data['price'] < 0:
+            return jsonify({'error': 'Цена должна быть положительным числом'}), 400
+        service.price = data['price']
+        
+    if 'is_available' in data:
+        if not isinstance(data['is_available'], bool):
+            return jsonify({'error': 'Поле доступности должно быть логическим значением'}), 400
+        service.is_available = data['is_available']
+    
+    # Сохранение изменений
     db.session.commit()
     
     return jsonify({
